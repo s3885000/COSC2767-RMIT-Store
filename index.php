@@ -88,52 +88,40 @@
                 <h2>Our Store</h2>
             </div>
             <div class="row rmit-product-section">
-              <?php
-              $link = mysqli_connect(
-                  "localhost",
-                  "db_admin",
-                  "rmit_password",
-                  "rmit_store_db"
-              );
-              if ($link) {
-                  $res = mysqli_query($link, "select * from store;");
-                  while ($row = mysqli_fetch_assoc($res)) { ?>
+            <?php
+            $link = mysqli_connect(
+                getenv('DB_HOST') ?: 'localhost',
+                getenv('DB_USER') ?: 'db_admin',
+                getenv('DB_PASSWORD') ?: 'rmit_password',
+                getenv('DB_NAME') ?: 'rmit_store_db'
+            );
 
-
-                <div class="col-md-3 col-sm-5 product-content">
-                    <?php echo '<img src="img/' .
-                        $row["ImageUrl"] .
-                        '" alt="">'; ?>
-                    <div class="media">
-                        <div class="media-left">
-
+            if (!$link) {
+                echo "<div class='error-content'><h1>Database connection error</h1>";
+                echo "<p>Error: " . mysqli_connect_error() . "</p></div>";
+            } else {
+                $res = mysqli_query($link, "SELECT * FROM stores;");
+                if ($res === false) {
+                    echo "<div class='error-content'><h1>Query execution failed</h1>";
+                    echo "<p>Error: " . mysqli_error($link) . "</p></div>";
+                } elseif ($res instanceof mysqli_result) {
+                    while ($row = mysqli_fetch_assoc($res)) {
+                        ?>
+                        <div class="col-md-3 col-sm-5 product-content">
+                            <img src="img/<?php echo htmlspecialchars($row["ImageUrl"]); ?>" alt="<?php echo htmlspecialchars($row["Name"]); ?>">
+                            <div class="media">
+                                <div class="media-left"></div>
+                                <div class="media-body">
+                                    <a href="#"><?php echo htmlspecialchars($row["Name"]); ?></a>
+                                    <p><?php echo htmlspecialchars($row["Price"]); ?> AUD</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="media-body">
-                            <a href="#"><?php echo $row["Name"]; ?></a>
-                            <p><?php echo $row["Price"]; ?> AUD</p>
-                        </div>
-                    </div>
-                </div>
-
-                <?php }
-              } else {
-                   ?>
-                <div style="width: 100%">
-                <div class="error-content">
-
-                    <h1>Database connection error</h1>
-                    <p>
-                    <?php echo mysqli_connect_errno() .
-                        ":" .
-                        mysqli_connect_error(); ?>
-                    </p>
-                  </div>
-                  </div>
-                  <?php
-              }
-              ?>
-
-
+                        <?php
+                    }
+                }
+            }
+            ?>
             </div>
         </section>
 
